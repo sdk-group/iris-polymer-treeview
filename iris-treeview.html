@@ -42,7 +42,7 @@
     <template is="dom-if" if="[[isBranch]]">
       <template is="dom-repeat" items="[[tier]]">
         <div class="branch">
-          <iris-treeview display-depth="[[down]]" data="[[getTier(item)]]" display-leaf="[[displayLeaf]]" path$="[[path]].[[item]]">
+          <iris-treeview display-depth="[[down]]" data="[[getTier(item)]]" selected="{{selected}}" display-leaf="[[displayLeaf]]" path$="[[path]].[[item]]">
             <span on-click="branchClick">[[item]]</span>
           </iris-treeview>
         </div>
@@ -74,6 +74,10 @@
         path: {
           type: String,
           value: ''
+        },
+        selected: {
+          type: Object,
+          notify: true
         }
       },
       branchClick(e) {
@@ -90,6 +94,8 @@
           value: branch,
           path: path
         });
+
+        this.set('selected', branch);
       },
       leafClick(e) {
         let path = this.path + '.' + item;
@@ -103,6 +109,8 @@
           value: this.value,
           path: path
         });
+
+        this.set('selected', this.value);
       },
       _dataChanged(data) {
         if (this.displayDepth <= 0) return;
