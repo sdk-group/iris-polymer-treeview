@@ -1,0 +1,129 @@
+<link rel="import" href="../../bower_components/polymer/polymer.html">
+
+<dom-module id="iris-treeview">
+  <template>
+    <style>
+      :host {
+        display: block;
+        position: relative;
+      }
+      
+      span {
+        cursor: pointer;
+      }
+      
+      iris-treeview:before {
+        content: '';
+        display: inline-block;
+        border-top: 2px solid;
+        padding-left: 15px;
+        margin-left: -25px;
+        height: 5px;
+      }
+      
+      .branch {
+        padding-left: 25px;
+        border-left: 2px solid;
+        position: relative;
+      }
+      
+      .branch:last-of-type:after {
+        content: '';
+        border-left: 2px solid;
+        position: absolute;
+        top: 10px;
+        bottom: 0;
+        color: white;
+        margin-left: -27px;
+      }
+    </style>
+    <content></content>
+
+    <template is="dom-if" if="[[isBranch]]">
+      <template is="dom-repeat" items="[[tier]]">
+        <div class="branch">
+          <iris-treeview display-depth="[[down]]" data="[[getTier(item)]]" display-leaf="[[displayLeaf]]" path$="[[path]].[[item]]">
+            <span on-click="branchClick">[[item]]</span>
+          </iris-treeview>
+        </div>
+      </template>
+    </template>
+
+    <template is="dom-if" if="[[isLeaf]]">
+      <span class="leaf" on-click="leafClick" hidden$="[[!displayLeaf]]">[[value]]</span>
+    </template>
+
+  </template>
+  <script>
+    'use strict'
+    Polymer({
+      is: 'iris-treeview',
+      properties: {
+        data: {
+          type: Object,
+          observer: '_dataChanged'
+        },
+        displayDepth: {
+          type: Number,
+          value: 10
+        },
+        displayLeaf: {
+          type: Boolean,
+          value: false
+        },
+        path: {
+          type: String,
+          value: ''
+        }
+      },
+      branchClick(e) {
+        let item = e.model.item;
+        let branch = this.data[item]
+        let path = this.path + '.' + item;
+
+        this.fire('select', {
+          type: 'branch',
+          value: branch,
+          path: path
+        });
+        this.fire('select-branch', {
+          value: branch,
+          path: path
+        });
+      },
+      leafClick(e) {
+        let path = this.path + '.' + item;
+        this.fire('select', {
+          type: 'leaf',
+          value: this.value,
+          path: path
+        });
+
+        this.fire('select-leaf', {
+          value: this.value,
+          path: path
+        });
+      },
+      _dataChanged(data) {
+        if (this.displayDepth <= 0) return;
+
+        this.down = this.displayDepth !== false ? this.displayDepth - 1 : false;
+
+        let branch = true;
+
+        if (_.isObject(data)) {
+          this.set('tier', _.keys(data));
+        } else {
+          branch = !branch;
+          this.set('value', data);
+        }
+
+        this.set('isBranch', branch);
+        this.set('isLeaf', !branch);
+      },
+      getTier(item) {
+        return this.data[item]
+      }
+    });
+  </script>
+</dom-module>
