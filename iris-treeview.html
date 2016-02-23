@@ -6,6 +6,7 @@
       :host {
         display: block;
         position: relative;
+        color: var(--mydoc-brown-1000);
       }
       
       span {
@@ -36,6 +37,10 @@
         color: white;
         margin-left: -27px;
       }
+      
+      .selected {
+        color: var(--mydoc-brown-400);
+      }
     </style>
     <content></content>
 
@@ -43,7 +48,7 @@
       <template is="dom-repeat" items="[[tier]]">
         <div class="branch">
           <iris-treeview display-depth="[[down]]" data="[[getTier(item)]]" selected="{{selected}}" display-leaf="[[displayLeaf]]" path$="[[path]].[[item]]">
-            <span on-click="branchClick">[[item]]</span>
+            <span class$="{{treeviewClass(selected,item)}}" on-click="branchClick">[[item]]</span>
           </iris-treeview>
         </div>
       </template>
@@ -80,6 +85,9 @@
           notify: true
         }
       },
+      treeviewClass(sel, item) {
+        return (sel == this.path + '.' + item) ? 'selected' : "";
+      },
       branchClick(e) {
         let item = e.model.item;
         let branch = this.data[item]
@@ -95,7 +103,7 @@
           path: path
         });
 
-        this.set('selected', branch);
+        this.set('selected', path);
       },
       leafClick(e) {
         let path = this.path + '.' + item;
@@ -110,7 +118,7 @@
           path: path
         });
 
-        this.set('selected', this.value);
+        this.set('selected', path);
       },
       _dataChanged(data) {
         if (this.displayDepth <= 0) return;
