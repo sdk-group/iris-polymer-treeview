@@ -45,9 +45,9 @@
     <content></content>
 
     <template is="dom-if" if="[[isBranch]]">
-      <template is="dom-repeat" items="[[tier]]">
-        <div class="branch">
-          <iris-treeview display-depth="[[down]]" data="[[getTier(item)]]" selected="{{selected}}" display-leaf="[[displayLeaf]]" path$="[[path]].[[item]]">
+      <template id="list" is="dom-repeat" items="[[tier]]">
+        <div class="branch" changed$="[[isChanged(item,switch)]]">
+          <iris-treeview display-depth="[[down]]" data="[[data]]" selected="{{selected}}" display-leaf="[[displayLeaf]]" path$="[[path]].[[item]]">
             <span class$="{{treeviewClass(selected,item)}}" on-click="branchClick">[[item]]</span>
           </iris-treeview>
         </div>
@@ -85,10 +85,18 @@
           notify: true
         }
       },
+      observers: ['_deepChanged(data.*)'],
+      _deepChanged(data) {
+        this.set('switch', !this.switch);
+      },
+      isChanged(item, s) {
+        return false;
+      },
       treeviewClass(sel, item) {
         return (sel == this.path + '.' + item) ? 'selected' : "";
       },
       branchClick(e) {
+        console.log(this.path);
         let item = e.model.item;
         let branch = this.data[item]
         let path = this.path + '.' + item;
@@ -122,13 +130,18 @@
       },
       _dataChanged(data) {
         if (this.displayDepth <= 0) return;
-
         this.down = this.displayDepth !== false ? this.displayDepth - 1 : false;
+        let q = this.path.split('.');
+
+        console.log('q:', this.path);
+        console.log('q:', q);
+        let current = _.slice(q, 1).length ? _.get(this.data, _.slice(q, 1)) : this.data;
+        console.log('current:', current);
 
         let branch = true;
 
         if (_.isObject(data)) {
-          this.set('tier', _.keys(data));
+          this.set('tier', _.keys(current));
         } else {
           branch = !branch;
           this.set('value', data);
