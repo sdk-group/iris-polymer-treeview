@@ -133,10 +133,7 @@
         this.down = this.displayDepth !== false ? this.displayDepth - 1 : false;
         let q = this.path.split('.');
 
-        console.log('q:', this.path);
-        console.log('q:', q);
         let current = _.slice(q, 1).length ? _.get(this.data, _.slice(q, 1)) : this.data;
-        console.log('current:', current);
 
         let branch = true;
 
